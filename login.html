@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Storefront Builder</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f2f5; /* Light gray background */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 1rem;
+            box-sizing: border-box;
+        }
+        .container {
+            background-color: #ffffff;
+            border-radius: 1.5rem; /* More rounded corners */
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 450px; /* Max width for login form */
+            padding: 2rem;
+            text-align: center;
+        }
+        .input-field {
+            border: 1px solid #e2e8f0;
+            border-radius: 0.75rem; /* Rounded corners for inputs */
+            padding: 0.75rem 1rem;
+            font-size: 1rem;
+            width: 100%;
+            box-sizing: border-box;
+            transition: border-color 0.2s;
+        }
+        .input-field:focus {
+            outline: none;
+            border-color: #3b82f6; /* Blue focus ring */
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+        }
+        .primary-button {
+            background-color: #FFA500; /* Vibrant Orange accent color */
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 0.75rem;
+            font-size: 1.125rem;
+            font-weight: 600;
+            transition: background-color 0.2s ease-in-out;
+            width: 100%;
+            cursor: pointer;
+        }
+        .primary-button:hover:not(:disabled) {
+            background-color: #FF8C00; /* Darker orange on hover */
+        }
+        .primary-button:disabled {
+            background-color: #fed7aa; /* Lighter orange when disabled */
+            cursor: not-allowed;
+        }
+        .link-text {
+            color: #3b82f6; /* Blue for links */
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+        .link-text:hover {
+            color: #2563eb; /* Darker blue on hover */
+        }
+
+        /* Custom Modal Styling */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
+        }
+        .modal-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+        .modal-content {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            max-width: 90%;
+            width: 400px;
+            transform: translateY(-20px);
+            transition: transform 0.3s ease-in-out;
+        }
+        .modal-overlay.show .modal-content {
+            transform: translateY(0);
+        }
+        .modal-button {
+            background-color: #3b82f6;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            margin-top: 1rem;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .modal-button:hover {
+            background-color: #2563eb;
+        }
+    </style>
+</head>
+<body class="antialiased">
+    <div class="container">
+        <h1 class="text-3xl font-bold text-gray-800 mb-6">Welcome Back!</h1>
+        <p class="text-gray-600 mb-8">Login to track your income and expenses.</p>
+
+        <div class="space-y-4 mb-6">
+            <div>
+                <label for="emailOrPhoneInput" class="sr-only">Email or Phone</label>
+                <input type="text" id="emailOrPhoneInput" class="input-field" placeholder="Email or Phone Number" oninput="checkFormValidity()">
+            </div>
+            <div>
+                <label for="passwordInput" class="sr-only">Password</label>
+                <input type="password" id="passwordInput" class="input-field" placeholder="Password" oninput="checkFormValidity()">
+            </div>
+        </div>
+
+        <button id="loginButton" class="primary-button mb-4" disabled>Login</button>
+
+        <p class="text-sm text-gray-600">
+            Don't have an account? <a href="signup-page.html" class="link-text">Sign Up</a>
+        </p>
+        <p class="text-sm text-gray-600 mt-2">
+            <a href="#" id="goToAddIncome" class="link-text">Go to Add Income (Demo)</a>
+        </p>
+    </div>
+
+    <div id="customModal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <p id="modalMessage" class="text-lg text-gray-800"></p>
+            <button id="modalCloseButton" class="modal-button">Okay</button>
+        </div>
+    </div>
+
+    <script>
+        // Get DOM elements
+        const emailOrPhoneInput = document.getElementById('emailOrPhoneInput');
+        const passwordInput = document.getElementById('passwordInput');
+        const loginButton = document.getElementById('loginButton');
+        const goToAddIncomeButton = document.getElementById('goToAddIncome');
+        const customModal = document.getElementById('customModal');
+        const modalMessage = document.getElementById('modalMessage');
+        const modalCloseButton = document.getElementById('modalCloseButton');
+
+        // Function to show custom modal
+        function showModal(message) {
+            modalMessage.textContent = message;
+            customModal.classList.remove('hidden');
+            setTimeout(() => customModal.classList.add('show'), 10);
+        }
+
+        // Function to hide custom modal
+        function hideModal() {
+            customModal.classList.remove('show');
+            setTimeout(() => customModal.classList.add('hidden'), 300);
+        }
+
+        // Function to check form validity
+        function checkFormValidity() {
+            const hasEmailOrPhone = emailOrPhoneInput.value.trim() !== '';
+            const hasPassword = passwordInput.value.trim() !== '';
+
+            if (hasEmailOrPhone && hasPassword) {
+                loginButton.disabled = false;
+            } else {
+                loginButton.disabled = true;
+            }
+        }
+
+        // Event listeners for input fields
+        emailOrPhoneInput.addEventListener('input', checkFormValidity);
+        passwordInput.addEventListener('input', checkFormValidity);
+
+        // Event listener for login button
+        loginButton.addEventListener('click', () => {
+            const emailOrPhone = emailOrPhoneInput.value.trim();
+            const password = passwordInput.value.trim();
+
+            if (emailOrPhone && password) {
+                // In a real app, you would send this to a backend for authentication
+                console.log('Attempting login:', { emailOrPhone, password });
+                showModal('Login successful! (Simulated)');
+                // Simulate navigation to a dashboard or main app
+                // window.location.href = 'dashboard.html'; // Example for real navigation
+            } else {
+                showModal('Please enter your email/phone and password.');
+            }
+        });
+
+        // Event listener for "Go to Add Income" demo button
+        goToAddIncomeButton.addEventListener('click', (e) => {
+            e.preventDefault(); // Prevent default link behavior
+            showModal('Navigating to Add Income screen... (Simulated)');
+            // In a real application, you would replace this with actual navigation
+            // window.location.href = 'add-income-app.html'; // Assuming add-income-app.html is in the same directory
+        });
+
+        // Event listener for custom modal close button
+        modalCloseButton.addEventListener('click', hideModal);
+        customModal.addEventListener('click', (e) => {
+            if (e.target === customModal) {
+                hideModal();
+            }
+        });
+
+        // Initial check on load
+        checkFormValidity();
+    </script>
+</body>
+</html>

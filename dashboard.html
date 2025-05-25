@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Storefront Builder</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f2f5; /* Light gray background */
+            display: flex;
+            justify-content: center;
+            align-items: flex-start; /* Align to top for better mobile scroll */
+            min-height: 100vh;
+            padding: 1rem;
+            box-sizing: border-box;
+        }
+        .container {
+            background-color: #ffffff;
+            border-radius: 1.5rem; /* More rounded corners */
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 600px; /* Wider for dashboard content */
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            min-height: 80vh; /* Ensure it takes up most of the screen height */
+        }
+        .primary-button {
+            background-color: #FFA500; /* Vibrant Orange accent color */
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 0.75rem;
+            font-size: 1.125rem;
+            font-weight: 600;
+            transition: background-color 0.2s ease-in-out;
+            width: 100%;
+            cursor: pointer;
+        }
+        .primary-button:hover {
+            background-color: #FF8C00; /* Darker orange on hover */
+        }
+        .income-text {
+            color: #22c55e; /* Green for income */
+        }
+        .expense-text {
+            color: #ef4444; /* Red for expenses */
+        }
+
+        /* Custom Modal Styling - Replicated for consistency */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
+        }
+        .modal-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+        .modal-content {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            max-width: 90%;
+            width: 400px;
+            transform: translateY(-20px);
+            transition: transform 0.3s ease-in-out;
+        }
+        .modal-overlay.show .modal-content {
+            transform: translateY(0);
+        }
+        .modal-button {
+            background-color: #3b82f6;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            margin-top: 1rem;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .modal-button:hover {
+            background-color: #2563eb;
+        }
+    </style>
+</head>
+<body class="antialiased">
+    <div class="container">
+        <div class="flex items-center justify-between p-4 border-b border-gray-200">
+            <h1 class="text-xl font-semibold text-gray-800">Dashboard</h1>
+            <button class="text-gray-500 hover:text-gray-700 focus:outline-none">
+                <i class="fas fa-ellipsis-v text-xl"></i>
+            </button>
+        </div>
+
+        <div class="p-6 bg-blue-50 rounded-b-xl mb-6">
+            <h2 class="text-lg font-medium text-gray-700 mb-4">Your Financial Overview (This Month)</h2>
+            <div class="grid grid-cols-3 gap-4 text-center">
+                <div class="bg-white p-4 rounded-lg shadow-sm">
+                    <p class="text-sm text-gray-500">Total Income</p>
+                    <p class="text-xl font-bold income-text mt-1" id="totalIncome">Ksh 0.00</p>
+                </div>
+                <div class="bg-white p-4 rounded-lg shadow-sm">
+                    <p class="text-sm text-gray-500">Total Expenses</p>
+                    <p class="text-xl font-bold expense-text mt-1" id="totalExpenses">Ksh 0.00</p>
+                </div>
+                <div class="bg-white p-4 rounded-lg shadow-sm">
+                    <p class="text-sm text-gray-500">Net Profit</p>
+                    <p class="text-xl font-bold text-gray-800 mt-1" id="netProfit">Ksh 0.00</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="flex-grow px-6 pb-6 space-y-4">
+            <h2 class="text-lg font-medium text-gray-700 mb-4">Recent Transactions</h2>
+            <div id="transactionsList" class="space-y-3">
+                </div>
+            <p id="noTransactionsMessage" class="text-center text-gray-500 hidden">No transactions yet. Add some income!</p>
+        </div>
+
+        <div class="p-6 pt-0 flex flex-col space-y-4">
+            <button id="addIncomeButton" class="primary-button">
+                <i class="fas fa-plus mr-2"></i> Add Income
+            </button>
+            <button id="addExpenseButton" class="primary-button bg-gray-600 hover:bg-gray-700">
+                <i class="fas fa-minus mr-2"></i> Add Expense (Coming Soon)
+            </button>
+        </div>
+    </div>
+
+    <div id="customModal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <p id="modalMessage" class="text-lg text-gray-800"></p>
+            <button id="modalCloseButton" class="modal-button">Okay</button>
+        </div>
+    </div>
+
+    <script>
+        // Get DOM elements
+        const totalIncomeElement = document.getElementById('totalIncome');
+        const totalExpensesElement = document.getElementById('totalExpenses');
+        const netProfitElement = document.getElementById('netProfit');
+        const transactionsList = document.getElementById('transactionsList');
+        const noTransactionsMessage = document.getElementById('noTransactionsMessage');
+        const addIncomeButton = document.getElementById('addIncomeButton');
+        const addExpenseButton = document.getElementById('addExpenseButton');
+
+        const customModal = document.getElementById('customModal');
+        const modalMessage = document.getElementById('modalMessage');
+        const modalCloseButton = document.getElementById('modalCloseButton');
+
+        // Function to show custom modal
+        function showModal(message) {
+            modalMessage.textContent = message;
+            customModal.classList.remove('hidden');
+            setTimeout(() => customModal.classList.add('show'), 10);
+        }
+
+        // Function to hide custom modal
+        function hideModal() {
+            customModal.classList.remove('show');
+            setTimeout(() => customModal.classList.add('hidden'), 300);
+        }
+
+        // Dummy Data for demonstration
+        const transactions = [
+            { id: 1, type: 'income', description: 'Maize Sales', amount: 5000, date: '2025-05-24' },
+            { id: 2, type: 'expense', description: 'Transport to Market', amount: 300, date: '2025-05-24' },
+            { id: 3, type: 'income', description: 'Samosa Sales', amount: 1200, date: '2025-05-23' },
+            { id: 4, type: 'income', description: 'Charcoal Sales', amount: 350, date: '2025-05-23' },
+            { id: 5, type: 'expense', description: 'Flour Purchase', amount: 800, date: '2025-05-22' },
+            { id: 6, type: 'income', description: 'Vegetable Sales', amount: 1500, date: '2025-05-22' },
+            { id: 7, type: 'income', description: 'Clothes Sales', amount: 8000, date: '2025-05-21' },
+            { id: 8, type: 'expense', description: 'Rent for Stall', amount: 2000, date: '2025-05-20' },
+        ];
+
+        // Function to render transactions and update summary
+        function renderTransactions() {
+            transactionsList.innerHTML = ''; // Clear existing list
+            let totalIncome = 0;
+            let totalExpenses = 0;
+
+            if (transactions.length === 0) {
+                noTransactionsMessage.classList.remove('hidden');
+            } else {
+                noTransactionsMessage.classList.add('hidden');
+            }
+
+            // Sort transactions by date (most recent first)
+            const sortedTransactions = [...transactions].sort((a, b) => new Date(b.date) - new Date(a.date));
+
+            sortedTransactions.forEach(transaction => {
+                const isIncome = transaction.type === 'income';
+                const amountClass = isIncome ? 'income-text' : 'expense-text';
+                const sign = isIncome ? '+' : '-';
+                const icon = isIncome ? '<i class="fas fa-arrow-up text-green-500"></i>' : '<i class="fas fa-arrow-down text-red-500"></i>';
+
+                if (isIncome) {
+                    totalIncome += transaction.amount;
+                } else {
+                    totalExpenses += transaction.amount;
+                }
+
+                const transactionItem = document.createElement('div');
+                transactionItem.className = 'flex items-center justify-between p-3 bg-white rounded-lg shadow-sm';
+                transactionItem.innerHTML = `
+                    <div class="flex items-center space-x-3">
+                        ${icon}
+                        <div>
+                            <p class="font-medium text-gray-800">${transaction.description}</p>
+                            <p class="text-xs text-gray-500">${new Date(transaction.date).toLocaleDateString('en-KE', { day: 'numeric', month: 'short', year: 'numeric' })}</p>
+                        </div>
+                    </div>
+                    <p class="font-semibold ${amountClass}">${sign} Ksh ${transaction.amount.toLocaleString('en-KE')}</p>
+                `;
+                transactionsList.appendChild(transactionItem);
+            });
+
+            const netProfit = totalIncome - totalExpenses;
+            totalIncomeElement.textContent = `Ksh ${totalIncome.toLocaleString('en-KE')}`;
+            totalExpensesElement.textContent = `Ksh ${totalExpenses.toLocaleString('en-KE')}`;
+            netProfitElement.textContent = `Ksh ${netProfit.toLocaleString('en-KE')}`;
+            netProfitElement.classList.remove('income-text', 'expense-text'); // Reset classes
+            if (netProfit > 0) {
+                netProfitElement.classList.add('income-text');
+            } else if (netProfit < 0) {
+                netProfitElement.classList.add('expense-text');
+            }
+        }
+
+        // Event listener for "Add Income" button
+        addIncomeButton.addEventListener('click', () => {
+            // In a real app, this would navigate to the add-income-app.html
+            showModal('Navigating to Add Income screen... (Simulated)');
+            // window.location.href = 'add-income-app.html'; // Uncomment for actual navigation
+        });
+
+        // Event listener for "Add Expense" button
+        addExpenseButton.addEventListener('click', () => {
+            showModal('Add Expense feature is coming soon!');
+        });
+
+        // Event listener for custom modal close button
+        modalCloseButton.addEventListener('click', hideModal);
+        customModal.addEventListener('click', (e) => {
+            if (e.target === customModal) {
+                hideModal();
+            }
+        });
+
+        // Initial render on page load
+        window.onload = renderTransactions;
+    </script>
+</body>
+</html>

@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome - Storefront Builder</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            /* Updated background: Subtle linear gradient */
+            background: linear-gradient(135deg, #f0f2f5 0%, #e0e7ee 100%); /* Light gray to light blue-gray */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 1rem;
+            box-sizing: border-box;
+            text-align: center;
+        }
+        .container {
+            background-color: #ffffff;
+            border-radius: 1.5rem; /* More rounded corners */
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 550px; /* Max width for entry page content */
+            padding: 2.5rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1.5rem; /* Spacing between elements */
+        }
+        .primary-button {
+            background-color: #FFA500; /* Vibrant Orange accent color */
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 0.75rem;
+            font-size: 1.125rem;
+            font-weight: 600;
+            transition: background-color 0.2s ease-in-out;
+            width: 100%;
+            max-width: 300px; /* Max width for buttons */
+            cursor: pointer;
+            text-decoration: none; /* Remove underline for links */
+            display: inline-flex; /* For icon alignment */
+            justify-content: center;
+            align-items: center;
+        }
+        .primary-button:hover {
+            background-color: #FF8C00; /* Darker orange on hover */
+        }
+        .secondary-button {
+            background-color: #e2e8f0; /* Light gray for secondary actions */
+            color: #4a5568; /* Dark gray text */
+            padding: 1rem 1.5rem;
+            border-radius: 0.75rem;
+            font-size: 1.125rem;
+            font-weight: 600;
+            transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
+            width: 100%;
+            max-width: 300px; /* Max width for buttons */
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .secondary-button:hover {
+            background-color: #cbd5e0; /* Slightly darker gray on hover */
+            color: #2d3748;
+        }
+        .app-icon {
+            font-size: 4rem; /* Large icon size */
+            color: #FFA500; /* Orange accent color */
+            margin-bottom: 1rem;
+        }
+
+        /* Custom Modal Styling - Replicated for consistency */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
+        }
+        .modal-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+        .modal-content {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            max-width: 90%;
+            width: 400px;
+            transform: translateY(-20px);
+            transition: transform 0.3s ease-in-out;
+        }
+        .modal-overlay.show .modal-content {
+            transform: translateY(0);
+        }
+        .modal-button {
+            background-color: #3b82f6;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            margin-top: 1rem;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .modal-button:hover {
+            background-color: #2563eb;
+        }
+    </style>
+</head>
+<body class="antialiased">
+    <div class="container">
+        <i class="fas fa-chart-bar app-icon"></i> <h1 class="text-4xl font-bold text-gray-800 mb-2">Storefront Builder</h1>
+        <p class="text-lg text-gray-600 mb-6">Your simple solution for tracking income & expenses.</p>
+
+        <div class="flex flex-col space-y-4 w-full items-center">
+            <a href="login-page.html" class="primary-button">
+                <i class="fas fa-sign-in-alt mr-2"></i> Login
+            </a>
+            <a href="signup-page.html" class="secondary-button">
+                <i class="fas fa-user-plus mr-2"></i> Sign Up
+            </a>
+            <a href="dashboard-page.html" class="secondary-button">
+                <i class="fas fa-chart-line mr-2"></i> View Dashboard (Demo)
+            </a>
+        </div>
+    </div>
+
+    <div id="customModal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <p id="modalMessage" class="text-lg text-gray-800"></p>
+            <button id="modalCloseButton" class="modal-button">Okay</button>
+        </div>
+    </div>
+
+    <script>
+        // Get DOM elements for modal
+        const customModal = document.getElementById('customModal');
+        const modalMessage = document.getElementById('modalMessage');
+        const modalCloseButton = document.getElementById('modalCloseButton');
+
+        // Function to show custom modal
+        function showModal(message) {
+            modalMessage.textContent = message;
+            customModal.classList.remove('hidden');
+            setTimeout(() => customModal.classList.add('show'), 10);
+        }
+
+        // Function to hide custom modal
+        function hideModal() {
+            customModal.classList.remove('show');
+            setTimeout(() => customModal.classList.add('hidden'), 300);
+        }
+
+        // Event listener for custom modal close button
+        modalCloseButton.addEventListener('click', hideModal);
+        customModal.addEventListener('click', (e) => {
+            if (e.target === customModal) {
+                hideModal();
+            }
+        });
+
+        // You can add more interactive elements or animations here if desired.
+        // For example, if you want to intercept clicks and show a modal before navigating:
+        document.querySelectorAll('.primary-button, .secondary-button').forEach(button => {
+            button.addEventListener('click', function(event) {
+                // Prevent default navigation for demonstration purposes
+                // In a real app, you'd let the href handle navigation directly
+                // event.preventDefault();
+                // const targetPage = this.getAttribute('href');
+                // showModal(`Navigating to ${this.textContent.trim()}...`);
+                // setTimeout(() => {
+                //     window.location.href = targetPage;
+                // }, 500); // Simulate a short delay
+            });
+        });
+    </script>
+</body>
+</html>

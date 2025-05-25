@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Income - Storefront Builder</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f2f5; /* Light gray background */
+            display: flex;
+            justify-content: center;
+            align-items: flex-start; /* Align to top for better mobile scroll */
+            min-height: 100vh;
+            padding: 1rem;
+            box-sizing: border-box;
+        }
+        .container {
+            background-color: #ffffff;
+            border-radius: 1.5rem; /* More rounded corners */
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 500px; /* Max width for larger screens */
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            min-height: 80vh; /* Ensure it takes up most of the screen height */
+        }
+        .microphone-button {
+            width: 100px;
+            height: 100px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #FFA500; /* Vibrant Orange accent color */
+            color: white;
+            border-radius: 9999px; /* Full circle */
+            font-size: 2.5rem;
+            box-shadow: 0 8px 15px rgba(255, 165, 0, 0.4);
+            transition: all 0.2s ease-in-out;
+            cursor: pointer;
+        }
+        .microphone-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 20px rgba(255, 165, 0, 0.5);
+        }
+        .microphone-button:active {
+            transform: translateY(0);
+            box-shadow: 0 5px 10px rgba(255, 165, 0, 0.3);
+        }
+        .microphone-button.listening {
+            animation: pulse 1.5s infinite;
+            background-color: #FF8C00; /* Darker orange when listening */
+        }
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(255, 165, 0, 0.4);
+            }
+            70% {
+                box-shadow: 0 0 0 20px rgba(255, 165, 0, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(255, 165, 0, 0);
+            }
+        }
+        .input-field {
+            border: 1px solid #e2e8f0;
+            border-radius: 0.75rem; /* Rounded corners for inputs */
+            padding: 0.75rem 1rem;
+            font-size: 1rem;
+            width: 100%;
+            box-sizing: border-box;
+            transition: border-color 0.2s;
+        }
+        .input-field:focus {
+            outline: none;
+            border-color: #3b82f6; /* Blue focus ring */
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+        }
+        .save-button {
+            background-color: #FFA500; /* Vibrant Orange accent color */
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 0.75rem;
+            font-size: 1.125rem;
+            font-weight: 600;
+            transition: background-color 0.2s ease-in-out;
+            width: 100%;
+            cursor: pointer;
+        }
+        .save-button:hover:not(:disabled) {
+            background-color: #FF8C00; /* Darker orange on hover */
+        }
+        .save-button:disabled {
+            background-color: #fed7aa; /* Lighter orange when disabled */
+            cursor: not-allowed;
+        }
+
+        /* Custom Modal Styling */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
+        }
+        .modal-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+        .modal-content {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            max-width: 90%;
+            width: 400px;
+            transform: translateY(-20px);
+            transition: transform 0.3s ease-in-out;
+        }
+        .modal-overlay.show .modal-content {
+            transform: translateY(0);
+        }
+        .modal-button {
+            background-color: #3b82f6;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            margin-top: 1rem;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .modal-button:hover {
+            background-color: #2563eb;
+        }
+    </style>
+</head>
+<body class="antialiased">
+    <div class="container">
+        <div class="flex items-center justify-between p-4 border-b border-gray-200">
+            <button id="closeButton" class="text-gray-500 hover:text-gray-700 focus:outline-none">
+                <i class="fas fa-times text-xl"></i>
+            </button>
+            <h1 class="text-xl font-semibold text-gray-800">Add Income</h1>
+            <div class="w-6"></div> </div>
+
+        <div class="flex-grow p-6 space-y-6">
+            <div class="flex flex-col items-center justify-center py-8 bg-gray-50 rounded-xl">
+                <button id="microphoneButton" class="microphone-button">
+                    <i class="fas fa-microphone"></i>
+                </button>
+                <p id="voiceInstruction" class="mt-4 text-gray-600 text-center text-sm">Tap to speak your sales.</p>
+
+                <div id="recognizedTextContainer" class="mt-6 w-full px-4 hidden">
+                    <div class="relative">
+                        <input type="text" id="recognizedTextInput" class="input-field pr-10 bg-white text-lg font-medium text-gray-800" readonly>
+                        <button id="editVoiceInput" class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 hover:text-gray-700">
+                            <i class="fas fa-pencil-alt"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="space-y-4">
+                <div class="relative flex items-center">
+                    <span class="absolute left-3 text-gray-500">Ksh</span>
+                    <input type="number" id="amountInput" class="input-field pl-12" placeholder="e.g., 2500" oninput="checkFormValidity()">
+                </div>
+
+                <div>
+                    <label for="descriptionInput" class="block text-sm font-medium text-gray-700 mb-1">What did you sell?</label>
+                    <input type="text" id="descriptionInput" class="input-field" placeholder="e.g., Maize, tomatoes, mandazi, charcoal" oninput="checkFormValidity()">
+                </div>
+
+                <div>
+                    <label for="dateInput" class="block text-sm font-medium text-gray-700 mb-1">Date</label>
+                    <input type="date" id="dateInput" class="input-field" onchange="checkFormValidity()">
+                </div>
+
+                <div>
+                    <label for="categorySelect" class="block text-sm font-medium text-gray-700 mb-1">Category (Optional)</label>
+                    <select id="categorySelect" class="input-field">
+                        <option value="">Select Category</option>
+                        <option value="food_sales">Food Sales</option>
+                        <option value="clothes">Clothes</option>
+                        <option value="services">Services</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="p-6 pt-0">
+            <button id="saveButton" class="save-button" disabled>Save Income</button>
+        </div>
+    </div>
+
+    <div id="customModal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <p id="modalMessage" class="text-lg text-gray-800"></p>
+            <button id="modalCloseButton" class="modal-button">Okay</button>
+        </div>
+    </div>
+
+    <script>
+        // Get DOM elements
+        const microphoneButton = document.getElementById('microphoneButton');
+        const voiceInstruction = document.getElementById('voiceInstruction');
+        const recognizedTextContainer = document.getElementById('recognizedTextContainer');
+        const recognizedTextInput = document.getElementById('recognizedTextInput');
+        const editVoiceInput = document.getElementById('editVoiceInput');
+        const amountInput = document.getElementById('amountInput');
+        const descriptionInput = document.getElementById('descriptionInput');
+        const dateInput = document.getElementById('dateInput');
+        const saveButton = document.getElementById('saveButton');
+        const closeButton = document.getElementById('closeButton');
+        const customModal = document.getElementById('customModal');
+        const modalMessage = document.getElementById('modalMessage');
+        const modalCloseButton = document.getElementById('modalCloseButton');
+
+        let isListening = false;
+        let voiceInputConfirmed = false;
+
+        // Function to show custom modal
+        function showModal(message) {
+            modalMessage.textContent = message;
+            customModal.classList.remove('hidden');
+            // Add 'show' class for animation
+            setTimeout(() => customModal.classList.add('show'), 10);
+        }
+
+        // Function to hide custom modal
+        function hideModal() {
+            customModal.classList.remove('show');
+            // Hide after animation
+            setTimeout(() => customModal.classList.add('hidden'), 300);
+        }
+
+        // Set current date for the date input
+        window.onload = function() {
+            const today = new Date();
+            const yyyy = today.getFullYear();
+            const mm = String(today.getMonth() + 1).padStart(2, '0'); // Months are 0-indexed
+            const dd = String(today.getDate()).padStart(2, '0');
+            dateInput.value = `${yyyy}-${mm}-${dd}`;
+            checkFormValidity(); // Check validity on load
+        };
+
+        // Event listener for microphone button
+        microphoneButton.addEventListener('click', () => {
+            if (!isListening) {
+                isListening = true;
+                microphoneButton.classList.add('listening');
+                voiceInstruction.textContent = 'Listening... Say the amount and what you sold.';
+                recognizedTextContainer.classList.add('hidden'); // Hide previous recognized text
+                recognizedTextInput.value = ''; // Clear previous text
+                voiceInputConfirmed = false; // Reset confirmation
+
+                // Simulate voice recognition process
+                setTimeout(() => {
+                    isListening = false;
+                    microphoneButton.classList.remove('listening');
+                    voiceInstruction.textContent = 'Tap to speak your sales.';
+
+                    // Simulate a recognized text
+                    const simulatedAmounts = ['5000', '1200', '350', '8000', '1500'];
+                    const simulatedItems = ['maize sales', 'samosas', 'charcoal', 'clothes', 'vegetables'];
+                    const randomAmount = simulatedAmounts[Math.floor(Math.random() * simulatedAmounts.length)];
+                    const randomItem = simulatedItems[Math.floor(Math.random() * simulatedItems.length)];
+                    const recognizedText = `Ksh ${randomAmount} for ${randomItem}`;
+
+                    recognizedTextInput.value = recognizedText;
+                    recognizedTextContainer.classList.remove('hidden');
+                    amountInput.value = randomAmount; // Auto-fill amount
+                    descriptionInput.value = randomItem; // Auto-fill description
+                    voiceInputConfirmed = true; // Mark as confirmed after simulation
+                    checkFormValidity(); // Check validity after voice input
+                }, 2000); // Simulate 2 seconds of listening/processing
+            }
+        });
+
+        // Event listener for edit voice input button
+        editVoiceInput.addEventListener('click', () => {
+            recognizedTextInput.readOnly = false; // Make it editable
+            recognizedTextInput.focus(); // Focus on the input field
+            // Remove the edit button or change its icon if needed, for simplicity we'll just make it editable
+        });
+
+        // Listen for changes in recognizedTextInput to update amount and description
+        recognizedTextInput.addEventListener('input', () => {
+            // Simple parsing: extract numbers for amount, rest for description
+            const text = recognizedTextInput.value;
+            const match = text.match(/Ksh\s*([\d,]+)/i);
+            if (match && match[1]) {
+                amountInput.value = match[1].replace(/,/g, ''); // Remove commas for number input
+            }
+            // For description, just use the whole text for now, or refine parsing
+            descriptionInput.value = text.replace(/Ksh\s*[\d,]+/i, '').trim();
+            checkFormValidity();
+        });
+
+        // Function to check form validity and enable/disable save button
+        function checkFormValidity() {
+            const hasAmount = amountInput.value.trim() !== '' && parseFloat(amountInput.value) > 0;
+            const hasDescription = descriptionInput.value.trim() !== '';
+            const hasDate = dateInput.value.trim() !== '';
+
+            // The form is valid if amount, description, and date are present.
+            // Voice input automatically fills these, so it's just a matter of checking the fields.
+            if (hasAmount && hasDescription && hasDate) {
+                saveButton.disabled = false;
+            } else {
+                saveButton.disabled = true;
+            }
+        }
+
+        // Add event listeners to manual input fields to check validity
+        amountInput.addEventListener('input', checkFormValidity);
+        descriptionInput.addEventListener('input', checkFormValidity);
+        dateInput.addEventListener('change', checkFormValidity); // Use 'change' for date input
+
+        // Event listener for save button
+        saveButton.addEventListener('click', () => {
+            const amount = amountInput.value;
+            const description = descriptionInput.value;
+            const date = dateInput.value;
+            const category = document.getElementById('categorySelect').value;
+
+            if (amount && description && date) {
+                // In a real app, you would send this data to a backend API
+                console.log('Saving Income:', { amount, description, date, category });
+                showModal('Income saved successfully!');
+
+                // Optionally clear form after saving
+                amountInput.value = '';
+                descriptionInput.value = '';
+                recognizedTextInput.value = '';
+                recognizedTextContainer.classList.add('hidden');
+                voiceInputConfirmed = false;
+                checkFormValidity();
+                // Reset date to today after saving
+                const today = new Date();
+                const yyyy = today.getFullYear();
+                const mm = String(today.getMonth() + 1).padStart(2, '0');
+                const dd = String(today.getDate()).padStart(2, '0');
+                dateInput.value = `${yyyy}-${mm}-${dd}`;
+
+            } else {
+                showModal('Please fill in all required fields (Amount, Description, Date).');
+            }
+        });
+
+        // Event listener for close button (top left 'X')
+        closeButton.addEventListener('click', () => {
+            showModal('Returning to Dashboard (simulated).');
+            // In a real app, you would navigate back to the dashboard here.
+        });
+
+        // Event listener for custom modal close button
+        modalCloseButton.addEventListener('click', hideModal);
+        // Also allow clicking outside the modal to close it
+        customModal.addEventListener('click', (e) => {
+            if (e.target === customModal) {
+                hideModal();
+            }
+        });
+    </script>
+</body>
+</html>
