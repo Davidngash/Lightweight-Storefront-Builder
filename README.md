@@ -18,7 +18,7 @@ To get started with the Storefront Builder, simply follow these steps:
 
 Clone the Repository:
 
-git clone [your-repository-url]
+git clone [https://github.com/Davidngash/Lightweight-Storefront-Builder.git]
 cd storefront-builder
 
 Open in Browser:

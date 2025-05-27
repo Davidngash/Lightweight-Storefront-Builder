@@ -1,0 +1,107 @@
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: #f0f2f5; /* Light gray background */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 1rem;
+    box-sizing: border-box;
+}
+.container {
+    background-color: #ffffff;
+    border-radius: 1.5rem; /* More rounded corners */
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 450px; /* Max width for signup form */
+    padding: 2rem;
+    text-align: center;
+}
+.input-field {
+    border: 1px solid #e2e8f0;
+    border-radius: 0.75rem; /* Rounded corners for inputs */
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+    width: 100%;
+    box-sizing: border-box;
+    transition: border-color 0.2s;
+}
+.input-field:focus {
+    outline: none;
+    border-color: #3b82f6; /* Blue focus ring */
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+}
+.primary-button {
+    background-color: #FFA500; /* Vibrant Orange accent color */
+    color: white;
+    padding: 1rem 1.5rem;
+    border-radius: 0.75rem;
+    font-size: 1.125rem;
+    font-weight: 600;
+    transition: background-color 0.2s ease-in-out;
+    width: 100%;
+    cursor: pointer;
+}
+.primary-button:hover:not(:disabled) {
+    background-color: #FF8C00; /* Darker orange on hover */
+}
+.primary-button:disabled {
+    background-color: #fed7aa; /* Lighter orange when disabled */
+    cursor: not-allowed;
+}
+.link-text {
+    color: #3b82f6; /* Blue for links */
+    text-decoration: none;
+    transition: color 0.2s;
+}
+.link-text:hover {
+    color: #2563eb; /* Darker blue on hover */
+}
+
+/* Custom Modal Styling */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
+}
+.modal-overlay.show {
+    opacity: 1;
+    visibility: visible;
+}
+.modal-content {
+    background-color: white;
+    padding: 2rem;
+    border-radius: 1rem;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    text-align: center;
+    max-width: 90%;
+    width: 400px;
+    transform: translateY(-20px);
+    transition: transform 0.3s ease-in-out;
+}
+.modal-overlay.show .modal-content {
+    transform: translateY(0);
+}
+.modal-button {
+    background-color: #3b82f6;
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem;
+    margin-top: 1rem;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+.modal-button:hover {
+    background-color: #2563eb;
+}
